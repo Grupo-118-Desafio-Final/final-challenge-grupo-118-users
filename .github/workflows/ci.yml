@@ -21,7 +21,7 @@ jobs:
       test-projects: './final-challenge-grupo-118-users.sln'
       dotnet-version: '8.0.x'
       build-configuration: 'Release'
-      dockerfile-path: './src/Adapters/Driving/Dockerfile'
+      dockerfile-path: './src/Adapters/Driving/FinalChallengeUsers.API/Dockerfile'
       image-name: 'final-challenge-grupo-118-users'
     secrets:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
