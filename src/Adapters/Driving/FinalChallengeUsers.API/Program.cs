@@ -17,6 +17,8 @@ using Infra.Database.SqlServer.UserPlan.Repositories;
 using Infra.Database.SqlServer.Users.Repositoires;
 using Infra.Password;
 using Microsoft.EntityFrameworkCore;
+using StandardDependencies.Injection;
+using StandardDependencies.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,19 @@ builder.Services.AddEndpointsApiExplorer();
 //    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
 //    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
 //});
+
+var swaggerOptions = builder
+    .Configuration
+    .GetSection(SwaggerOptions.SectionName)
+    .Get<SwaggerOptions>();
+
+var openTelemetryOptions = builder
+    .Configuration
+    .GetSection(OpenTelemetryOptions.SectionName)
+    .Get<OpenTelemetryOptions>();
+
+// Configura elementos comuns: Environment Variables, OpenTelemetry e Swagger
+builder.ConfigureCommonElements(openTelemetryOptions, swaggerOptions);
 
 builder.Services.AddControllers();
 

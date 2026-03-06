@@ -89,7 +89,7 @@ public class UserController : ControllerBase
         return Ok(userResponseDto);
     }
 
-    [HttpGet]
+    [HttpGet("GetAll")]
     public async Task<IActionResult> GetAllAsync()
     {
         var userResponseDtoList = await _userManager.GetAllUsersAsync();
