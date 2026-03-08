@@ -1,5 +1,5 @@
 using NSubstitute;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Infra.Password;
 using Domain.Users.Entities;
 using System.IdentityModel.Tokens.Jwt;
@@ -13,19 +13,29 @@ public class PasswordManagerTest
     private const string JwtIssuer = "test-issuer";
     private const string JwtAudience = "test-audience";
 
-    private readonly IConfiguration _configuration;
     private readonly PasswordManager _sut;
 
     public PasswordManagerTest()
     {
-        _configuration = Substitute.For<IConfiguration>();
-        _configuration["Security:Key"].Returns(SecretKey);
-        _configuration["Jwt:Key"].Returns(JwtKey);
-        _configuration["Jwt:Issuer"].Returns(JwtIssuer);
-        _configuration["Jwt:Audience"].Returns(JwtAudience);
-        _configuration["Jwt:ExpirationMinutes"].Returns("60");
+        _sut = CreateSut(SecretKey, JwtKey);
+    }
 
-        _sut = new PasswordManager(_configuration);
+    private static PasswordManager CreateSut(
+        string securityKey = SecretKey,
+        string jwtKey = JwtKey,
+        string issuer = JwtIssuer,
+        string audience = JwtAudience,
+        int expirationMinutes = 60)
+    {
+        var settings = new SecuritySettings
+        {
+            SecurityKey = securityKey,
+            JwtKey = jwtKey,
+            JwtIssuer = issuer,
+            JwtAudience = audience,
+            JwtExpirationMinutes = expirationMinutes
+        };
+        return new PasswordManager(Options.Create(settings));
     }
 
     // --- CreatePasswordHash ---
@@ -62,7 +72,6 @@ public class PasswordManagerTest
     {
         _sut.CreatePasswordHash("teste123", out var hash);
 
-        // Should not throw
         var bytes = Convert.FromBase64String(hash);
         Assert.NotEmpty(bytes);
     }
@@ -120,7 +129,6 @@ public class PasswordManagerTest
 
         var token = _sut.GenerateJwtToken(user);
 
-        // JWT has 3 parts separated by dots
         var parts = token.Split('.');
         Assert.Equal(3, parts.Length);
     }
@@ -187,9 +195,7 @@ public class PasswordManagerTest
     [Fact]
     public void GenerateJwtToken_WhenJwtKeyIsEmpty_ShouldThrowInvalidOperationException()
     {
-        var config = Substitute.For<IConfiguration>();
-        config["Jwt:Key"].Returns(string.Empty);
-        var sut = new PasswordManager(config);
+        var sut = CreateSut(jwtKey: string.Empty);
         var user = new User("Test", "User", "test@email.com", new DateTime(1990, 1, 1));
 
         Assert.Throws<InvalidOperationException>(() => sut.GenerateJwtToken(user));
@@ -198,9 +204,7 @@ public class PasswordManagerTest
     [Fact]
     public void GenerateJwtToken_WhenJwtKeyIsTooShort_ShouldThrowInvalidOperationException()
     {
-        var config = Substitute.For<IConfiguration>();
-        config["Jwt:Key"].Returns("short-key");
-        var sut = new PasswordManager(config);
+        var sut = CreateSut(jwtKey: "short-key");
         var user = new User("Test", "User", "test@email.com", new DateTime(1990, 1, 1));
 
         Assert.Throws<InvalidOperationException>(() => sut.GenerateJwtToken(user));
@@ -209,9 +213,7 @@ public class PasswordManagerTest
     [Fact]
     public void CreatePasswordHash_WhenSecurityKeyIsEmpty_ShouldThrowInvalidOperationException()
     {
-        var config = Substitute.For<IConfiguration>();
-        config["Security:Key"].Returns(string.Empty);
-        var sut = new PasswordManager(config);
+        var sut = CreateSut(securityKey: string.Empty);
 
         Assert.Throws<InvalidOperationException>(() => sut.CreatePasswordHash("password", out _));
     }
@@ -219,9 +221,7 @@ public class PasswordManagerTest
     [Fact]
     public void VerifyPassword_WhenSecurityKeyIsEmpty_ShouldThrowInvalidOperationException()
     {
-        var config = Substitute.For<IConfiguration>();
-        config["Security:Key"].Returns(string.Empty);
-        var sut = new PasswordManager(config);
+        var sut = CreateSut(securityKey: string.Empty);
 
         Assert.Throws<InvalidOperationException>(() => sut.VerifyPassword("password", "hash"));
     }

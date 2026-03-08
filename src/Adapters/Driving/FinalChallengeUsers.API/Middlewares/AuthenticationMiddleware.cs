@@ -1,4 +1,6 @@
 ﻿using Domain.ApiKey.Ports.Out;
+using Infra.Password;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -9,6 +11,7 @@ namespace FinalChallengeUsers.API.Middlewares;
 public class AuthenticationMiddleware
 {
     private readonly IApiKeyRepository _apiKeyRepository;
+    private readonly SecuritySettings _securitySettings;
     private readonly IConfiguration _configuration;
     private readonly ILogger<AuthenticationMiddleware> _logger;
     private static readonly string[] AllowedPaths = new[] { "/users/login", "/users" };
@@ -16,10 +19,12 @@ public class AuthenticationMiddleware
     public AuthenticationMiddleware(
         IApiKeyRepository apiKeyRepository,
         ILogger<AuthenticationMiddleware> logger,
+        IOptions<SecuritySettings> securitySettings,
         IConfiguration configuration)
     {
         _apiKeyRepository = apiKeyRepository;
         _logger = logger;
+        _securitySettings = securitySettings.Value;
         _configuration = configuration;
     }
 
@@ -60,12 +65,11 @@ public class AuthenticationMiddleware
         var token = bearer?.Split(" ").Last();
         if (!string.IsNullOrWhiteSpace(token))
         {
-            var jwtKey = _configuration["Jwt:Key"];
-            var validIssuer = _configuration["Jwt:Issuer"];
-            var validAudience = _configuration["Jwt:Audience"];
+            var validIssuer = _securitySettings.JwtIssuer;
+            var validAudience = _securitySettings.JwtAudience;
 
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes(jwtKey ?? string.Empty);
+            var key = Encoding.UTF8.GetBytes(_securitySettings.JwtKey);
 
             var validationParameters = new TokenValidationParameters
             {

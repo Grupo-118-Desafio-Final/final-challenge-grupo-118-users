@@ -49,6 +49,9 @@ builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+builder.Services.Configure<SecuritySettings>(
+    builder.Configuration.GetSection("Security"));
+
 builder.Services.AddScoped<IPasswordManager, PasswordManager>();
 
 builder.Services.AddScoped<IUserManager, UserManager>();

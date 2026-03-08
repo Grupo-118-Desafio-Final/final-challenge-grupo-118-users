@@ -2,6 +2,7 @@ using NSubstitute;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Primitives;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -10,6 +11,7 @@ using System.Text;
 using Domain.ApiKey.Entities;
 using Domain.ApiKey.Ports.Out;
 using FinalChallengeUsers.API.Middlewares;
+using Infra.Password;
 
 namespace UnitTests.Adapters.Middleware;
 
@@ -29,11 +31,15 @@ public class AuthenticationMiddlewareTest
         _apiKeyRepository = Substitute.For<IApiKeyRepository>();
         _logger = Substitute.For<ILogger<AuthenticationMiddleware>>();
         _configuration = Substitute.For<IConfiguration>();
-        _configuration["Jwt:Key"].Returns(JwtKey);
-        _configuration["Jwt:Issuer"].Returns(JwtIssuer);
-        _configuration["Jwt:Audience"].Returns(JwtAudience);
 
-        _sut = new AuthenticationMiddleware(_apiKeyRepository, _logger, _configuration);
+        var securitySettings = Options.Create(new SecuritySettings
+        {
+            JwtKey = JwtKey,
+            JwtIssuer = JwtIssuer,
+            JwtAudience = JwtAudience
+        });
+
+        _sut = new AuthenticationMiddleware(_apiKeyRepository, _logger, securitySettings, _configuration);
     }
 
     [Theory]
