@@ -87,14 +87,29 @@ secret:
   data:
     #         STEPS: 2. Criação das chaves no secret, com os valores que foram mapeados dos segredos
     users-sql-connectionstring: "${ConnectionStrings__DefaultConnection}"
-    users-redis-connectionstring: "${ConnectionStrings__Redis}"
-    
+    users-redis-connectionstring: "${ConnectionStrings__Redis}"   
+    users-security-securitykey: "${Security__SecurityKey}"
+    users-security-jwtkey: "${Security__JwtKey}"
+    users-security-jwtissuer: "${Security__JwtIssuer}"
+    users-security-jwtaudience: "${Security__JwtAudience}"
+    users-security-jwttexpiration: "${Security__JwtExpirationMinutes}"       
+
   #         STEPS: 3. Mapear as chaves dos segredos para variaveis de ambientes, no formato que o asp.net reconhece para sobrescrever as configs do json
   envVars:
     - name: ConnectionStrings__DefaultConnection
       secretKey: users-sql-connectionstring
     - name: ConnectionStrings__Redis
       secretKey: users-redis-connectionstring
+    - name: Security__SecurityKey
+      secretKey: users-security-securitykey
+    - name: Security__JwtKey
+      secretKey: users-security-jwtkey
+    - name: Security__JwtIssuer
+      secretKey: users-security-jwtissuer
+    - name: Security__JwtAudience
+      secretKey: users-security-jwtaudience
+    - name: Security__JwtExpirationMinutes
+      secretKey: users-security-jwttexpiration
 
 nodeSelector: {}
 

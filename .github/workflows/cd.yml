@@ -34,7 +34,12 @@ jobs:
             "ACR_USERNAME": "ACR_USERNAME",
             "ACR_PASSWORD": "ACR_PASSWORD",
             "ConnectionStrings__DefaultConnection": "APPLICATION_SQLSERVER_CONNECTIONSTRING",
-            "ConnectionStrings__Redis": "APPLICATION_REDIS_CONNECTIONSTRING"            
+            "ConnectionStrings__Redis": "APPLICATION_REDIS_CONNECTIONSTRING",
+            "Security__SecurityKey":"APPLICATION_SECURITY_SECURITYKEY",
+            "Security__JwtKey":"APPLICATION_SECURITY_JWTKEY",
+            "Security__JwtIssuer":"APPLICATION_SECURITY_JWTISSUER",
+            "Security__JwtAudience":"APPLICATION_SECURITY_JTWAUDIENCE",
+            "Security__JwtExpirationMinutes":"APPLICATION_SECURITY_JWTEXPIRATION"  
         }
       variables_mapping: |
         {
