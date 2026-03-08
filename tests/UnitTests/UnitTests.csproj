@@ -27,6 +27,7 @@
     <ProjectReference Include="..\..\src\Core\Domain\Domain\Domain.csproj" />
     <ProjectReference Include="..\..\src\Core\Application\Application\Application.csproj" />
     <ProjectReference Include="..\..\src\Adapters\Driving\FinalChallengeUsers.API\FinalChallengeUsers.API.csproj" />
+    <ProjectReference Include="..\..\src\Adapters\Driven\Infra.Password\Infra.Password.csproj" />
   </ItemGroup>
 
   <ItemGroup>
