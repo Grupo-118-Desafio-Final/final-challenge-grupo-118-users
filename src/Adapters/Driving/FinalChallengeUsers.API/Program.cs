@@ -87,18 +87,13 @@ using (var scope = app.Services.CreateScope())
     await db.Database.MigrateAsync();
 }
 
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
 app.Use(async (context, next) =>
 {
     var authMiddleware = context.RequestServices.GetRequiredService<AuthenticationMiddleware>();
     await authMiddleware.InvokeAsync(context, next);
 });
+
+app.UseStandarizedSwagger(swaggerOptions);
 
 app.UseHttpsRedirection();
 
