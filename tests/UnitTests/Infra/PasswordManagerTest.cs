@@ -181,4 +181,48 @@ public class PasswordManagerTest
 
         Assert.NotEqual(token1, token2);
     }
+
+    // --- Validação de chaves ausentes ou inválidas ---
+
+    [Fact]
+    public void GenerateJwtToken_WhenJwtKeyIsEmpty_ShouldThrowInvalidOperationException()
+    {
+        var config = Substitute.For<IConfiguration>();
+        config["Jwt:Key"].Returns(string.Empty);
+        var sut = new PasswordManager(config);
+        var user = new User("Test", "User", "test@email.com", new DateTime(1990, 1, 1));
+
+        Assert.Throws<InvalidOperationException>(() => sut.GenerateJwtToken(user));
+    }
+
+    [Fact]
+    public void GenerateJwtToken_WhenJwtKeyIsTooShort_ShouldThrowInvalidOperationException()
+    {
+        var config = Substitute.For<IConfiguration>();
+        config["Jwt:Key"].Returns("short-key");
+        var sut = new PasswordManager(config);
+        var user = new User("Test", "User", "test@email.com", new DateTime(1990, 1, 1));
+
+        Assert.Throws<InvalidOperationException>(() => sut.GenerateJwtToken(user));
+    }
+
+    [Fact]
+    public void CreatePasswordHash_WhenSecurityKeyIsEmpty_ShouldThrowInvalidOperationException()
+    {
+        var config = Substitute.For<IConfiguration>();
+        config["Security:Key"].Returns(string.Empty);
+        var sut = new PasswordManager(config);
+
+        Assert.Throws<InvalidOperationException>(() => sut.CreatePasswordHash("password", out _));
+    }
+
+    [Fact]
+    public void VerifyPassword_WhenSecurityKeyIsEmpty_ShouldThrowInvalidOperationException()
+    {
+        var config = Substitute.For<IConfiguration>();
+        config["Security:Key"].Returns(string.Empty);
+        var sut = new PasswordManager(config);
+
+        Assert.Throws<InvalidOperationException>(() => sut.VerifyPassword("password", "hash"));
+    }
 }

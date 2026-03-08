@@ -24,14 +24,22 @@ public class PasswordManager : IPasswordManager
     /// <param name="passwordHash">The resulting hashed password as a Base64-encoded string.</param>  
     public void CreatePasswordHash(string password, out string passwordHash)
     {
-        var secretKey = Encoding.UTF8.GetBytes(_configuration["Security:Key"]);
+        var rawKey = _configuration["Security:Key"];
+        if (string.IsNullOrWhiteSpace(rawKey))
+            throw new InvalidOperationException("Security:Key não está configurado. Defina-o via variável de ambiente ou secrets.");
+
+        var secretKey = Encoding.UTF8.GetBytes(rawKey);
         using var hmac = new HMACSHA512(secretKey);
         passwordHash = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(password)));
     }
 
     public bool VerifyPassword(string password, string storedHash)
     {
-        var secretKey = Encoding.UTF8.GetBytes(_configuration["Security:Key"]);
+        var rawKey = _configuration["Security:Key"];
+        if (string.IsNullOrWhiteSpace(rawKey))
+            throw new InvalidOperationException("Security:Key não está configurado. Defina-o via variável de ambiente ou secrets.");
+
+        var secretKey = Encoding.UTF8.GetBytes(rawKey);
         using var hmac = new HMACSHA512(secretKey);
         var computedHash = Convert.ToBase64String(hmac.ComputeHash(Encoding.UTF8.GetBytes(password)));
         return computedHash == storedHash;
@@ -39,14 +47,17 @@ public class PasswordManager : IPasswordManager
 
     public string GenerateJwtToken(UserEntity user)
     {
+        var rawJwtKey = _configuration["Jwt:Key"];
+        if (string.IsNullOrWhiteSpace(rawJwtKey) || rawJwtKey.Length < 32)
+            throw new InvalidOperationException("Jwt:Key não está configurado ou é muito curto (mínimo 32 caracteres). Defina-o via variável de ambiente ou secrets.");
+
         var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Name),
             };
 
-        var key = new SymmetricSecurityKey(
-        Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(rawJwtKey));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
         var tokenDescriptor = new SecurityTokenDescriptor
