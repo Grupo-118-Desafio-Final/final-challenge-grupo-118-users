@@ -77,6 +77,8 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "FinalChallengeUsersAPI";
 });
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -103,5 +105,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.Run();
