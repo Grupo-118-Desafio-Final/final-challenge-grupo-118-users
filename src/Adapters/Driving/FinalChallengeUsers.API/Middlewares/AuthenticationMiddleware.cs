@@ -14,7 +14,7 @@ public class AuthenticationMiddleware
     private readonly SecuritySettings _securitySettings;
     private readonly IConfiguration _configuration;
     private readonly ILogger<AuthenticationMiddleware> _logger;
-    private static readonly string[] AllowedPaths = new[] { "/users/login", "/users" };
+    private static readonly string[] AllowedPaths = new[] { "/users/login", "/users","health","/swagger" };
 
     public AuthenticationMiddleware(
         IApiKeyRepository apiKeyRepository,
