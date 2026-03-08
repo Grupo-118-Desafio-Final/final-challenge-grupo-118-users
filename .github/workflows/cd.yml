@@ -39,7 +39,8 @@ jobs:
             "Security__JwtKey":"APPLICATION_SECURITY_JWTKEY",
             "Security__JwtIssuer":"APPLICATION_SECURITY_JWTISSUER",
             "Security__JwtAudience":"APPLICATION_SECURITY_JTWAUDIENCE",
-            "Security__JwtExpirationMinutes":"APPLICATION_SECURITY_JWTEXPIRATION"  
+            "Security__JwtExpirationMinutes":"APPLICATION_SECURITY_JWTEXPIRATION",
+            "OpenTelemetry__Url": "GRAFANA_OTLP_URL"
         }
       variables_mapping: |
         {

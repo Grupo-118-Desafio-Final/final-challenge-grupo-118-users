@@ -92,7 +92,8 @@ secret:
     users-security-jwtkey: "${Security__JwtKey}"
     users-security-jwtissuer: "${Security__JwtIssuer}"
     users-security-jwtaudience: "${Security__JwtAudience}"
-    users-security-jwttexpiration: "${Security__JwtExpirationMinutes}"       
+    users-security-jwttexpiration: "${Security__JwtExpirationMinutes}"
+    otlp-url: "${OpenTelemetry__Url}"
 
   #         STEPS: 3. Mapear as chaves dos segredos para variaveis de ambientes, no formato que o asp.net reconhece para sobrescrever as configs do json
   envVars:
@@ -110,6 +111,8 @@ secret:
       secretKey: users-security-jwtaudience
     - name: Security__JwtExpirationMinutes
       secretKey: users-security-jwttexpiration
+    - name: OpenTelemetry__Url
+      secretKey: otlp-url
 
 nodeSelector: {}
 
