@@ -62,6 +62,24 @@ public class AuthenticationMiddlewareTest
         await _apiKeyRepository.DidNotReceive().GetByKeyAsync(Arg.Any<string>());
     }
 
+    [Theory]
+    [InlineData("/swagger/index.html")]
+    [InlineData("/swagger/swagger.js")]
+    public async Task InvokeAsync_WhenContainsSwaggerContent_ShouldBeAllowedWithoutAuth(string path)
+    {
+        // Arrange
+        var context = CreateHttpContext(path);
+        var nextCalled = false;
+        RequestDelegate next = _ => { nextCalled = true; return Task.CompletedTask; };
+
+        // Act
+        await _sut.InvokeAsync(context, next);
+
+        // Assert
+        Assert.True(nextCalled);
+        await _apiKeyRepository.DidNotReceive().GetByKeyAsync(Arg.Any<string>());
+    }
+    
     [Fact]
     public async Task InvokeAsync_WhenValidApiKey_ShouldCallNextAndSetApiKeyIdInContext()
     {
