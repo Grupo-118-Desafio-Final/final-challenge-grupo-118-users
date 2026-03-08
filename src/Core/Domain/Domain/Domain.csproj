@@ -6,4 +6,19 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Folder Include="Base\Exceptions\" />
+    <Folder Include="Base\Extensions\" />
+    <Folder Include="Plan\Exceptions\" />
+    <Folder Include="Plan\Extensions\" />
+    <Folder Include="UserPlan\Exceptions\" />
+    <Folder Include="UserPlan\Extensions\" />
+    <Folder Include="Users\Exceptions\" />
+    <Folder Include="Users\ValueObjects\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.3.9" />
+  </ItemGroup>
+
 </Project>
