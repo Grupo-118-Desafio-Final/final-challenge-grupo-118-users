@@ -14,16 +14,16 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-    <PackageReference Include="FinalChallenge.Grupo118.StandardDependencies.Injection" Version="2026.3.1.211345" />
-    <PackageReference Include="FinalChallenge.Grupo118.StandardDependencies.Models" Version="2026.3.1.211345" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.24" />
+    <PackageReference Include="FinalChallenge.Grupo118.StandardDependencies.Injection" Version="2026.3.9.5823" />
+    <PackageReference Include="FinalChallenge.Grupo118.StandardDependencies.Models" Version="2026.3.9.5823" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.16" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.23">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.24" />
+    <PackageReference Include="Microsoft.OpenApi" Version="1.6.14" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.22.1" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.0" />
   </ItemGroup>
 
   <ItemGroup>
