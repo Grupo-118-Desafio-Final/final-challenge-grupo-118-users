@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.OpenApi;
 using Microsoft.OpenApi.Models;
@@ -5,6 +6,7 @@ using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace FinalChallengeUsers.API.Filter;
 
+[ExcludeFromCodeCoverage]
 public class OAuthOperationsFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
