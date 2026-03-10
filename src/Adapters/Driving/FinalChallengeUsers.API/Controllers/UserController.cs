@@ -39,7 +39,7 @@ public class UserController : ControllerBase
         var token = await _userManager.LoginAsync(loginParameters.Email, loginParameters.Password);
 
         // JWTs são sempre compostos por três segmentos separados por ponto
-        return token.StartsWith("ey") ? Ok(token) : Unauthorized(new { message = token });
+        return token?.StartsWith("ey") == true ? Ok(token) : Unauthorized(new { message = token });
     }
 
     /// <summary>

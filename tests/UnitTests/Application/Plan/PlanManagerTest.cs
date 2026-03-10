@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using PlanManager = Application.Plans.PlanManager;
 using PlanEntity = Domain.Plan.Entities.Plan;
@@ -20,7 +21,7 @@ public class PlanManagerTest
     {
         _planRepository = Substitute.For<IPlanRepository>();
         _userPlanManager = Substitute.For<IUserPlanManager>();
-        _sut = new PlanManager(_planRepository, _userPlanManager);
+        _sut = new PlanManager(Substitute.For<ILogger<PlanManager>>(), _planRepository, _userPlanManager);
     }
 
     [Fact]
@@ -180,7 +181,7 @@ public class PlanManagerTest
     }
 
     [Fact]
-    public async Task UpdateAsync_WhenPlanNotFound_ShouldCallUpdateWithNull()
+    public async Task UpdateAsync_WhenPlanNotFound_ShouldNotCallUpdateRepository()
     {
         // Arrange
         _planRepository.GetByIdAsync(99).Returns((PlanEntity)null!);
@@ -190,6 +191,6 @@ public class PlanManagerTest
         await _sut.UpdateAsync(dto);
 
         // Assert
-        await _planRepository.Received(1).UpdateAsync(null!);
+        await _planRepository.DidNotReceive().UpdateAsync(Arg.Any<PlanEntity>());
     }
 }

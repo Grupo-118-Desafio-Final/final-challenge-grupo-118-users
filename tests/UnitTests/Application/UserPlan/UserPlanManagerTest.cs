@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using UserPlanManager = Application.UserPlan.UserPlanManager;
 using UserPlanEntity = Domain.UserPlan.Entities.UserPlan;
@@ -15,7 +16,7 @@ public class UserPlanManagerTest
     public UserPlanManagerTest()
     {
         _userPlanRepository = Substitute.For<IUserPlanRepository>();
-        _sut = new UserPlanManager(_userPlanRepository);
+        _sut = new UserPlanManager(Substitute.For<ILogger<UserPlanManager>>(), _userPlanRepository);
     }
 
     [Fact]
@@ -150,7 +151,7 @@ public class UserPlanManagerTest
     }
 
     [Fact]
-    public async Task UpdateAsync_WhenEntityNotFound_ShouldCallUpdateWithNull()
+    public async Task UpdateAsync_WhenEntityNotFound_ShouldNotCallUpdateRepository()
     {
         // Arrange
         _userPlanRepository.GetByIdAsync(99).Returns((UserPlanEntity)null!);
@@ -160,6 +161,6 @@ public class UserPlanManagerTest
         await _sut.UpdateAsync(request);
 
         // Assert
-        await _userPlanRepository.Received(1).UpdateAsync(null!);
+        await _userPlanRepository.DidNotReceive().UpdateAsync(Arg.Any<UserPlanEntity>());
     }
 }

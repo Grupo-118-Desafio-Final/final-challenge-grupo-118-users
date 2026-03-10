@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using PlanManager = Application.Plans.PlanManager;
 using PlanEntity = Domain.Plan.Entities.Plan;
@@ -18,7 +19,7 @@ public class PlanManagerEdgeCasesTest
     {
         _planRepository = Substitute.For<IPlanRepository>();
         _userPlanManager = Substitute.For<IUserPlanManager>();
-        _sut = new PlanManager(_planRepository, _userPlanManager);
+        _sut = new PlanManager(Substitute.For<ILogger<PlanManager>>(), _planRepository, _userPlanManager);
     }
 
     [Fact]
@@ -91,11 +92,7 @@ public class PlanManagerEdgeCasesTest
     public async Task CreateAsync_ShouldCallRepositoryExactlyOnce()
     {
         // Arrange
-        var dto = new PlanCreateRequestDto
-        {
-            Name = "Novo Plano",
-            Price = 15m
-        };
+        var dto = new PlanCreateRequestDto { Name = "Novo Plano", Price = 15m };
 
         // Act
         await _sut.CreateAsync(dto);
