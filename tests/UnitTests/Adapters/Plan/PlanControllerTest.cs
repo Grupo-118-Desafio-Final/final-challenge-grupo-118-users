@@ -69,7 +69,7 @@ public class PlanControllerTest
     }
 
     [Fact]
-    public async Task GetById_WhenManagerReturnsNull_ShouldReturnOkWithNull()
+    public async Task GetById_WhenManagerReturnsNull_ShouldReturnNotFound()
     {
         // Arrange
         _planManager.GetById(99).Returns((PlanResponseDto)null!);
@@ -78,8 +78,21 @@ public class PlanControllerTest
         var result = await _sut.GetById(99);
 
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        Assert.Null(okResult.Value);
+        Assert.IsType<NotFoundResult>(result);
+    }
+
+    [Fact]
+    public async Task GetPlanByUserId_WhenManagerReturnsNull_ShouldReturnNotFound()
+    {
+        // Arrange
+        var userId = "user-sem-plano";
+        _planManager.GetPlanByUserId(userId).Returns((PlanResponseDto)null!);
+
+        // Act
+        var result = await _sut.GetPlanByUserId(userId);
+
+        // Assert
+        Assert.IsType<NotFoundResult>(result);
     }
 
     [Fact]

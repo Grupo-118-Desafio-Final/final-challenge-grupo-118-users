@@ -1,4 +1,6 @@
+using Microsoft.Extensions.Logging;
 using NSubstitute;
+using UnitTests.Helpers;
 using UserPlanManager = Application.UserPlan.UserPlanManager;
 using UserPlanEntity = Domain.UserPlan.Entities.UserPlan;
 using UserPlanCreateRequest = Domain.UserPlan.Dto.UserPlanCreateRequest;
@@ -9,13 +11,15 @@ namespace UnitTests.Application.UserPlan;
 
 public class UserPlanManagerTest
 {
+    private readonly ILogger<UserPlanManager> _logger;
     private readonly IUserPlanRepository _userPlanRepository;
     private readonly UserPlanManager _sut;
 
     public UserPlanManagerTest()
     {
+        _logger = Substitute.For<ILogger<UserPlanManager>>();
         _userPlanRepository = Substitute.For<IUserPlanRepository>();
-        _sut = new UserPlanManager(_userPlanRepository);
+        _sut = new UserPlanManager(_logger, _userPlanRepository);
     }
 
     [Fact]
@@ -150,7 +154,7 @@ public class UserPlanManagerTest
     }
 
     [Fact]
-    public async Task UpdateAsync_WhenEntityNotFound_ShouldCallUpdateWithNull()
+    public async Task UpdateAsync_WhenEntityNotFound_ShouldNotCallUpdateRepository()
     {
         // Arrange
         _userPlanRepository.GetByIdAsync(99).Returns((UserPlanEntity)null!);
@@ -160,6 +164,35 @@ public class UserPlanManagerTest
         await _sut.UpdateAsync(request);
 
         // Assert
-        await _userPlanRepository.Received(1).UpdateAsync(null!);
+        await _userPlanRepository.DidNotReceive().UpdateAsync(Arg.Any<UserPlanEntity>());
+    }
+
+    [Fact]
+    public async Task CreateAsync_WhenRepositoryThrows_ShouldLogErrorAndRethrow()
+    {
+        // Arrange
+        var request = new UserPlanCreateRequest { UserId = "user-1", PlanId = 1 };
+        var expectedException = new InvalidOperationException("Erro no banco de dados");
+        _userPlanRepository
+            .When(r => r.CreateAsync(Arg.Any<UserPlanEntity>()))
+            .Do(_ => throw expectedException);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.CreateAsync(request));
+        _logger.ShouldHaveLoggedError(expectedException);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_WhenRepositoryThrows_ShouldLogErrorAndRethrow()
+    {
+        // Arrange
+        var expectedException = new InvalidOperationException("Erro de conexão");
+        _userPlanRepository
+            .When(r => r.GetAllAsync())
+            .Do(_ => throw expectedException);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(_sut.GetAllAsync);
+        _logger.ShouldHaveLoggedError(expectedException);
     }
 }

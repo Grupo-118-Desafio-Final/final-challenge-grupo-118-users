@@ -1,0 +1,297 @@
+{
+  "info": {
+    "name": "FinalChallenge - Grupo 118 - Users API",
+    "description": "Collection gerada para os controllers da Users API do desafio final do Grupo 118.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "description": "URL base da API. Ajuste conforme o ambiente."
+    },
+    {
+      "key": "token",
+      "value": "",
+      "description": "Token JWT preenchido automaticamente após o login."
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Usuários",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const token = pm.response.text().replace(/\"/g, '');",
+                  "    pm.collectionVariables.set('token', token);",
+                  "    console.log('Token salvo na variável {{token}}');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"usuario@email.com\",\n  \"password\": \"SuaSenha123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "login"]
+            },
+            "description": "Autentica o usuário e salva o token JWT automaticamente na variável {{token}}."
+          }
+        },
+        {
+          "name": "Criar Usuário",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"João\",\n  \"lastName\": \"Silva\",\n  \"email\": \"joao.silva@email.com\",\n  \"birthDate\": \"1990-05-15T00:00:00\",\n  \"password\": \"SuaSenha123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            },
+            "description": "Cria um novo usuário. Não requer autenticação."
+          }
+        },
+        {
+          "name": "Atualizar Usuário",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"João Atualizado\",\n  \"lastName\": \"Silva\",\n  \"email\": \"joao.silva@email.com\",\n  \"birthDate\": \"1990-05-15T00:00:00\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/00000000-0000-0000-0000-000000000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "00000000-0000-0000-0000-000000000000"]
+            },
+            "description": "Atualiza os dados de um usuário. Substitua o UUID na URL pelo ID real."
+          }
+        },
+        {
+          "name": "Deletar Usuário",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/users/00000000-0000-0000-0000-000000000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "00000000-0000-0000-0000-000000000000"]
+            },
+            "description": "Remove um usuário pelo ID. Substitua o UUID na URL pelo ID real."
+          }
+        },
+        {
+          "name": "Buscar Usuário por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users/00000000-0000-0000-0000-000000000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "00000000-0000-0000-0000-000000000000"]
+            },
+            "description": "Retorna um usuário pelo ID. Substitua o UUID na URL pelo ID real."
+          }
+        },
+        {
+          "name": "Listar Todos os Usuários",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            },
+            "description": "Retorna todos os usuários cadastrados."
+          }
+        },
+        {
+          "name": "Buscar Usuário por E-mail",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/users/email/joao.silva@email.com",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "email", "joao.silva@email.com"]
+            },
+            "description": "Retorna um usuário pelo e-mail. Substitua o e-mail na URL."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Planos",
+      "item": [
+        {
+          "name": "Criar Plano",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Premium\",\n  \"price\": 49.90,\n  \"imageQuality\": 2,\n  \"maxSizeInMegaBytes\": \"500\",\n  \"maxDurationInSeconds\": \"60\",\n  \"threads\": \"4\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/plan",
+              "host": ["{{baseUrl}}"],
+              "path": ["plan"]
+            },
+            "description": "Cria um novo plano.\n\nValores de imageQuality:\n- 1 = Hd\n- 2 = FullHd\n- 3 = UltraHd\n- 4 = FourK\n- 5 = EightK"
+          }
+        },
+        {
+          "name": "Buscar Plano por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/plan/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["plan", "1"]
+            },
+            "description": "Retorna um plano pelo ID numérico. Resultado é cacheado por 10 minutos."
+          }
+        },
+        {
+          "name": "Buscar Plano por Usuário",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/plan/user/00000000-0000-0000-0000-000000000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["plan", "user", "00000000-0000-0000-0000-000000000000"]
+            },
+            "description": "Retorna o plano associado a um usuário. Substitua o UUID pelo ID real do usuário."
+          }
+        },
+        {
+          "name": "Listar Todos os Planos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/plan",
+              "host": ["{{baseUrl}}"],
+              "path": ["plan"]
+            },
+            "description": "Retorna todos os planos cadastrados. Resultado é cacheado por 10 minutos."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vínculo Usuário-Plano",
+      "item": [
+        {
+          "name": "Criar Vínculo",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"00000000-0000-0000-0000-000000000000\",\n  \"planId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/userplan",
+              "host": ["{{baseUrl}}"],
+              "path": ["userplan"]
+            },
+            "description": "Vincula um usuário a um plano."
+          }
+        },
+        {
+          "name": "Atualizar Vínculo",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1,\n  \"userId\": \"00000000-0000-0000-0000-000000000000\",\n  \"planId\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/userplan",
+              "host": ["{{baseUrl}}"],
+              "path": ["userplan"]
+            },
+            "description": "Atualiza o plano vinculado a um usuário."
+          }
+        },
+        {
+          "name": "Buscar Vínculo por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/userplan/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["userplan", "1"]
+            },
+            "description": "Retorna um vínculo usuário-plano pelo ID numérico."
+          }
+        },
+        {
+          "name": "Buscar Vínculo por Usuário",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/userplan/user/00000000-0000-0000-0000-000000000000",
+              "host": ["{{baseUrl}}"],
+              "path": ["userplan", "user", "00000000-0000-0000-0000-000000000000"]
+            },
+            "description": "Retorna o vínculo de um usuário com seu plano. Substitua o UUID pelo ID real do usuário."
+          }
+        },
+        {
+          "name": "Listar Todos os Vínculos",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/userplan",
+              "host": ["{{baseUrl}}"],
+              "path": ["userplan"]
+            },
+            "description": "Retorna todos os vínculos usuário-plano cadastrados."
+          }
+        },
+        {
+          "name": "Deletar Vínculo",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/userplan/1",
+              "host": ["{{baseUrl}}"],
+              "path": ["userplan", "1"]
+            },
+            "description": "Remove um vínculo usuário-plano pelo ID numérico."
+          }
+        }
+      ]
+    }
+  ]
+}

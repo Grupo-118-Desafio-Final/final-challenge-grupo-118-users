@@ -1,79 +1,101 @@
-﻿using Application.Cache;
+using Application.Cache;
 using Domain.Plan.Dto;
 using Domain.Plan.Ports.In;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Caching.Distributed;
-using System.Security.Claims;
-using System.Text.Json;
 
 namespace FinalChallengeUsers.API.Controllers;
 
-[Authorize]
+/// <summary>
+/// Controller responsável por expor endpoints HTTP relacionados ao gerenciamento de planos.
+/// </summary>
 [ApiController]
 [Route("plan")]
-public class PlanController : Controller
+public class PlanController : ControllerBase
 {
     private readonly IPlanManager _planManager;
     private readonly CacheService _cache;
 
+    /// <summary>
+    /// Inicializa uma nova instância de <see cref="PlanController"/>.
+    /// </summary>
+    /// <param name="planManager">Instância de <see cref="IPlanManager"/> usada para operações de plano.</param>
+    /// <param name="cache">Serviço de cache distribuído.</param>
     public PlanController(IPlanManager planManager, CacheService cache)
     {
         _planManager = planManager;
         _cache = cache;
     }
 
-    [HttpGet("GetById")]
+    /// <summary>
+    /// Retorna um plano pelo seu identificador.
+    /// </summary>
+    /// <param name="id">Identificador do plano.</param>
+    /// <returns>
+    /// HTTP 200 com os dados do plano, ou HTTP 404 caso não seja encontrado.
+    /// </returns>
+    [HttpGet("{id}")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> GetById(int id)
     {
-        var userId2 = User.FindFirstValue(ClaimTypes.NameIdentifier);
         var cacheKey = $"plan:{id}";
 
-        var result = await _cache.GetOrCreateAsync(cacheKey, async () =>
-        {
-            var plan = await _planManager.GetById(id);
-            return plan;
-        }, TimeSpan.FromMinutes(10));
+        var result = await _cache.GetOrCreateAsync(cacheKey, () => _planManager.GetById(id), TimeSpan.FromMinutes(10));
 
-        var options = new DistributedCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(10)
-        };
+        if (result is null)
+            return NotFound();
 
         return Ok(result);
     }
 
+    /// <summary>
+    /// Cria um novo plano com os dados fornecidos.
+    /// </summary>
+    /// <param name="planCreateRequestDto">Dados do plano a ser criado.</param>
+    /// <returns>HTTP 201 em caso de sucesso.</returns>
     [HttpPost]
-    public async Task<IActionResult> Create(
-        PlanCreateRequestDto planCreateRequestDto)
+    [ProducesResponseType(201)]
+    public async Task<IActionResult> Create([FromBody] PlanCreateRequestDto planCreateRequestDto)
     {
         await _planManager.CreateAsync(planCreateRequestDto);
 
         return Created();
     }
 
-    [HttpGet("GetByUserId")]
+    /// <summary>
+    /// Retorna o plano associado a um usuário pelo seu identificador.
+    /// </summary>
+    /// <param name="userId">Identificador do usuário.</param>
+    /// <returns>
+    /// HTTP 200 com os dados do plano, ou HTTP 404 caso não seja encontrado.
+    /// </returns>
+    [HttpGet("user/{userId}")]
+    [ProducesResponseType(200)]
+    [ProducesResponseType(404)]
     public async Task<IActionResult> GetPlanByUserId(string userId)
     {
         var cacheKey = $"user_plan:{userId}";
-        var plan = await _cache.GetOrCreateAsync(cacheKey, async () =>
-        {
-            var plan = await _planManager.GetPlanByUserId(userId);
-            return plan;
-        }, TimeSpan.FromMinutes(10));
+
+        var plan = await _cache.GetOrCreateAsync(cacheKey, () => _planManager.GetPlanByUserId(userId), TimeSpan.FromMinutes(10));
+
+        if (plan is null)
+            return NotFound();
 
         return Ok(plan);
     }
 
-    [HttpGet("GetAll")]
+    /// <summary>
+    /// Retorna todos os planos cadastrados.
+    /// </summary>
+    /// <returns>HTTP 200 com a lista de planos.</returns>
+    [HttpGet]
+    [ProducesResponseType(200)]
     public async Task<IActionResult> GetAll()
     {
-        var cacheKey = $"plans:all";
-        var result = await _cache.GetOrCreateAsync(cacheKey, async () =>
-        {
-            var plans = await _planManager.GetAll();
-            return plans;
-        }, TimeSpan.FromMinutes(10));
+        var cacheKey = "plans:all";
+
+        var result = await _cache.GetOrCreateAsync(cacheKey, () => _planManager.GetAll(), TimeSpan.FromMinutes(10));
+
         return Ok(result);
     }
 }

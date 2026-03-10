@@ -1,10 +1,14 @@
+using Microsoft.Extensions.Logging;
 using NSubstitute;
-using UserManager = global::Application.User.UserManager;
-using UserEntity = global::Domain.Users.Entities.User;
-using UserCreateRequestDto = global::Domain.Users.Dto.UserCreateRequestDto;
-using UserUpdateRequestDto = global::Domain.Users.Dto.UserUpdateRequestDto;
-using IPasswordManager = global::Domain.Users.Ports.In.IPasswordManager;
-using IUserRepository = global::Domain.Users.Ports.Out.IUserRepository;
+using UserManager = Application.User.UserManager;
+using UserEntity = Domain.Users.Entities.User;
+using UserCreateRequestDto = Domain.Users.Dto.UserCreateRequestDto;
+using UserUpdateRequestDto = Domain.Users.Dto.UserUpdateRequestDto;
+using IPasswordManager = Domain.Users.Ports.In.IPasswordManager;
+using IUserRepository = Domain.Users.Ports.Out.IUserRepository;
+using IUserPlanManager = Domain.UserPlan.Ports.In.IUserPlanManager;
+using IPlanManager = Domain.Plan.Ports.In.IPlanManager;
+using PlanResponseDto = Domain.Plan.Dto.PlanResponseDto;
 
 namespace UnitTests.Application.User;
 
@@ -12,6 +16,8 @@ public class UserManagerTest
 {
     private readonly IPasswordManager _passwordManager;
     private readonly IUserRepository _userRepository;
+    private readonly IUserPlanManager _userPlanManager;
+    private readonly IPlanManager _planManager;
     private readonly UserManager _sut;
     private static readonly DateTime DefaultBirthDate = new(1990, 5, 20);
 
@@ -19,7 +25,14 @@ public class UserManagerTest
     {
         _passwordManager = Substitute.For<IPasswordManager>();
         _userRepository = Substitute.For<IUserRepository>();
-        _sut = new UserManager(_passwordManager, _userRepository);
+        _userPlanManager = Substitute.For<IUserPlanManager>();
+        _planManager = Substitute.For<IPlanManager>();
+        _sut = new UserManager(
+            Substitute.For<ILogger<UserManager>>(),
+            _passwordManager,
+            _userRepository,
+            _userPlanManager,
+            _planManager);
     }
 
     [Fact]
@@ -37,6 +50,7 @@ public class UserManagerTest
         _passwordManager
             .When(p => p.CreatePasswordHash(Arg.Any<string>(), out Arg.Any<string>()))
             .Do(call => call[1] = "hashed_senha123");
+        _planManager.GetByNameAsync("Default").Returns(new PlanResponseDto { Id = 1, Name = "Default" });
 
         // Act
         var result = await _sut.CreateUserAsync(request);
@@ -68,18 +82,18 @@ public class UserManagerTest
     }
 
     [Fact]
-    public async Task DeleteUser_WhenUserNotFound_ShouldNotCallDelete()
+    public async Task DeleteUser_WhenUserNotFound_ShouldReturnErrorDtoAndNotCallDelete()
     {
         // Arrange
         var id = Guid.NewGuid();
         _userRepository.GetByIdAsync(id).Returns((UserEntity)null!);
 
         // Act
-        // UserManager.DeleteUser calls UserResponseDto.ToDto(null) when user is not found,
-        // causing NullReferenceException — Delete must not be called before that point.
-        await Assert.ThrowsAsync<NullReferenceException>(() => _sut.DeleteUser(id));
+        var result = await _sut.DeleteUser(id);
 
         // Assert
+        Assert.True(result.Error);
+        Assert.Equal("User not found.", result.ErrorMessage);
         await _userRepository.DidNotReceive().Delete(Arg.Any<UserEntity>());
     }
 

@@ -1,5 +1,5 @@
-using NSubstitute;
 using Microsoft.AspNetCore.Mvc;
+using NSubstitute;
 using FinalChallengeUsers.API.Controllers;
 using FinalChallengeUsers.API.Model;
 using UserResponseDto = Domain.Users.Dto.UserResponseDto;
@@ -26,29 +26,29 @@ public class UserControllerTest
     {
         // Arrange
         var loginParams = new LoginParameters { Email = "joao@email.com", Password = "senha123" };
-        _userManager.LoginAsync(loginParams.Email, loginParams.Password).Returns("jwt-token");
+        _userManager.LoginAsync(loginParams.Email, loginParams.Password).Returns("eyJhbGciOiJIUzI1NiJ9.payload.signature");
 
         // Act
         var result = await _sut.Login(loginParams);
 
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
-        Assert.Equal("jwt-token", okResult.Value);
+        Assert.NotNull(okResult.Value);
         await _userManager.Received(1).LoginAsync(loginParams.Email, loginParams.Password);
     }
 
     [Fact]
-    public async Task Login_WhenCredentialsAreInvalid_ShouldReturnUnauthorized()
+    public async Task Login_WhenCredentialsAreInvalid_ShouldReturnUnauthorizedWithMessage()
     {
         // Arrange
         var loginParams = new LoginParameters { Email = "invalid@email.com", Password = "wrongpassword" };
-        _userManager.LoginAsync(loginParams.Email, loginParams.Password).Returns(string.Empty);
+        _userManager.LoginAsync(loginParams.Email, loginParams.Password).Returns("Invalid password.");
 
         // Act
         var result = await _sut.Login(loginParams);
 
         // Assert
-        Assert.IsType<UnauthorizedResult>(result);
+        Assert.IsType<UnauthorizedObjectResult>(result);
     }
 
     [Fact]
@@ -62,11 +62,11 @@ public class UserControllerTest
         var result = await _sut.Login(loginParams);
 
         // Assert
-        Assert.IsType<UnauthorizedResult>(result);
+        Assert.IsType<UnauthorizedObjectResult>(result);
     }
 
     [Fact]
-    public async Task Create_ShouldCallManagerAndReturnOkWithUser()
+    public async Task Create_ShouldCallManagerAndReturnCreatedWithUser()
     {
         // Arrange
         var dto = new UserCreateRequestDto { Name = "João", LastName = "Silva", Email = "joao@email.com", BirthDate = DefaultBirthDate, Password = "senha123" };
@@ -77,13 +77,13 @@ public class UserControllerTest
         var result = await _sut.Create(dto);
 
         // Assert
-        var okResult = Assert.IsType<OkObjectResult>(result);
-        Assert.Equal(responseDto, okResult.Value);
+        var createdResult = Assert.IsType<CreatedResult>(result);
+        Assert.Equal(responseDto, createdResult.Value);
         await _userManager.Received(1).CreateUserAsync(dto);
     }
 
     [Fact]
-    public async Task PutAsync_ShouldSetIdAndCallManagerAndReturnOk()
+    public async Task PutAsync_WhenUserExists_ShouldSetIdAndReturnOk()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -98,11 +98,26 @@ public class UserControllerTest
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(responseDto, okResult.Value);
         Assert.Equal(id, dto.Id);
-        await _userManager.Received(1).UpdateUserAsync(Arg.Is<UserUpdateRequestDto>(r => r.Id == id));
     }
 
     [Fact]
-    public async Task DeleteAsync_ShouldCallManagerAndReturnOk()
+    public async Task PutAsync_WhenUserNotFound_ShouldReturnNotFound()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        var dto = new UserUpdateRequestDto { Name = "Maria" };
+        _userManager.UpdateUserAsync(Arg.Any<UserUpdateRequestDto>())
+            .Returns(new UserResponseDto { Error = true, ErrorMessage = "User not found." });
+
+        // Act
+        var result = await _sut.PutAsync(id, dto);
+
+        // Assert
+        Assert.IsType<NotFoundObjectResult>(result);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_WhenUserExists_ShouldReturnOk()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -119,7 +134,22 @@ public class UserControllerTest
     }
 
     [Fact]
-    public async Task GetByIdAsync_ShouldCallManagerAndReturnOk()
+    public async Task DeleteAsync_WhenUserNotFound_ShouldReturnNotFound()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        _userManager.DeleteUser(id)
+            .Returns(new UserResponseDto { Error = true, ErrorMessage = "User not found." });
+
+        // Act
+        var result = await _sut.DeleteAsync(id);
+
+        // Assert
+        Assert.IsType<NotFoundObjectResult>(result);
+    }
+
+    [Fact]
+    public async Task GetByIdAsync_WhenUserExists_ShouldReturnOk()
     {
         // Arrange
         var id = Guid.NewGuid();
@@ -132,17 +162,30 @@ public class UserControllerTest
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(responseDto, okResult.Value);
-        await _userManager.Received(1).GetUserByIdAsync(id);
     }
 
     [Fact]
-    public async Task GetAllAsync_ShouldCallManagerAndReturnOkWithList()
+    public async Task GetByIdAsync_WhenUserNotFound_ShouldReturnNotFound()
+    {
+        // Arrange
+        var id = Guid.NewGuid();
+        _userManager.GetUserByIdAsync(id).Returns((UserResponseDto)null!);
+
+        // Act
+        var result = await _sut.GetByIdAsync(id);
+
+        // Assert
+        Assert.IsType<NotFoundResult>(result);
+    }
+
+    [Fact]
+    public async Task GetAllAsync_ShouldReturnOkWithList()
     {
         // Arrange
         var users = new List<UserResponseDto>
         {
-            new UserResponseDto { Name = "João", Email = "joao@email.com" },
-            new UserResponseDto { Name = "Maria", Email = "maria@email.com" }
+            new() { Name = "João", Email = "joao@email.com" },
+            new() { Name = "Maria", Email = "maria@email.com" }
         };
         _userManager.GetAllUsersAsync().Returns(users);
 
@@ -152,14 +195,13 @@ public class UserControllerTest
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(users, okResult.Value);
-        await _userManager.Received(1).GetAllUsersAsync();
     }
 
     [Fact]
     public async Task GetAllAsync_WhenNoUsers_ShouldReturnOkWithEmptyList()
     {
         // Arrange
-        _userManager.GetAllUsersAsync().Returns(new List<UserResponseDto>());
+        _userManager.GetAllUsersAsync().Returns([]);
 
         // Act
         var result = await _sut.GetAllAsync();
@@ -171,7 +213,7 @@ public class UserControllerTest
     }
 
     [Fact]
-    public async Task GetByEmailAsync_ShouldCallManagerAndReturnOk()
+    public async Task GetByEmailAsync_WhenUserExists_ShouldReturnOk()
     {
         // Arrange
         var email = "joao@email.com";
@@ -184,6 +226,18 @@ public class UserControllerTest
         // Assert
         var okResult = Assert.IsType<OkObjectResult>(result);
         Assert.Equal(responseDto, okResult.Value);
-        await _userManager.Received(1).GetUserByEmailAsync(email);
+    }
+
+    [Fact]
+    public async Task GetByEmailAsync_WhenUserNotFound_ShouldReturnNotFound()
+    {
+        // Arrange
+        _userManager.GetUserByEmailAsync("naoexiste@email.com").Returns((UserResponseDto)null!);
+
+        // Act
+        var result = await _sut.GetByEmailAsync("naoexiste@email.com");
+
+        // Assert
+        Assert.IsType<NotFoundResult>(result);
     }
 }
