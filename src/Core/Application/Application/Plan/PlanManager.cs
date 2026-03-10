@@ -4,6 +4,7 @@ using Domain.Plan.Ports.Out;
 using Domain.UserPlan.Ports.In;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Application.Plans;
 
@@ -38,13 +39,7 @@ public class PlanManager : IPlanManager
         }
         catch (Exception ex)
         {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
-            {
-                { "exception.type", ex.GetType().FullName },
-                { "exception.message", ex.Message },
-                { "exception.stacktrace", ex.StackTrace }
-            }));
+            RecordExceptionSpan(activity, ex);
             _logger.LogError(ex, "Error creating plan with name {PlanName}", planCreateRequestDto.Name);
             throw;
         }
@@ -65,13 +60,7 @@ public class PlanManager : IPlanManager
         }
         catch (Exception ex)
         {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
-            {
-                { "exception.type", ex.GetType().FullName },
-                { "exception.message", ex.Message },
-                { "exception.stacktrace", ex.StackTrace }
-            }));
+            RecordExceptionSpan(activity, ex);
             _logger.LogError(ex, "Error deleting plan {PlanId}", id);
             throw;
         }
@@ -93,13 +82,7 @@ public class PlanManager : IPlanManager
         }
         catch (Exception ex)
         {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
-            {
-                { "exception.type", ex.GetType().FullName },
-                { "exception.message", ex.Message },
-                { "exception.stacktrace", ex.StackTrace }
-            }));
+            RecordExceptionSpan(activity, ex);
             _logger.LogError(ex, "Error fetching all plans");
             throw;
         }
@@ -122,13 +105,7 @@ public class PlanManager : IPlanManager
         }
         catch (Exception ex)
         {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
-            {
-                { "exception.type", ex.GetType().FullName },
-                { "exception.message", ex.Message },
-                { "exception.stacktrace", ex.StackTrace }
-            }));
+            RecordExceptionSpan(activity, ex);
             _logger.LogError(ex, "Error fetching plan {PlanId}", id);
             throw;
         }
@@ -151,13 +128,7 @@ public class PlanManager : IPlanManager
         }
         catch (Exception ex)
         {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
-            {
-                { "exception.type", ex.GetType().FullName },
-                { "exception.message", ex.Message },
-                { "exception.stacktrace", ex.StackTrace }
-            }));
+            RecordExceptionSpan(activity, ex);
             _logger.LogError(ex, "Error fetching plan by name {PlanName}", name);
             throw;
         }
@@ -178,13 +149,7 @@ public class PlanManager : IPlanManager
         }
         catch (Exception ex)
         {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
-            {
-                { "exception.type", ex.GetType().FullName },
-                { "exception.message", ex.Message },
-                { "exception.stacktrace", ex.StackTrace }
-            }));
+            RecordExceptionSpan(activity, ex);
             _logger.LogError(ex, "Error fetching plan for user {UserId}", userId);
             throw;
         }
@@ -216,15 +181,25 @@ public class PlanManager : IPlanManager
         }
         catch (Exception ex)
         {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
-            {
-                { "exception.type", ex.GetType().FullName },
-                { "exception.message", ex.Message },
-                { "exception.stacktrace", ex.StackTrace }
-            }));
+            RecordExceptionSpan(activity, ex);
             _logger.LogError(ex, "Error updating plan {PlanId}", planUpdateRequestDto.Id);
             throw;
         }
+    }
+
+    /// <summary>
+    /// Registra a exceção no span do OpenTelemetry. Excluído da cobertura pois é
+    /// infraestrutura de observabilidade — coberto pelos testes de integração.
+    /// </summary>
+    [ExcludeFromCodeCoverage]
+    private static void RecordExceptionSpan(Activity? activity, Exception ex)
+    {
+        activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+        activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
+        {
+            { "exception.type", ex.GetType().FullName },
+            { "exception.message", ex.Message },
+            { "exception.stacktrace", ex.StackTrace }
+        }));
     }
 }

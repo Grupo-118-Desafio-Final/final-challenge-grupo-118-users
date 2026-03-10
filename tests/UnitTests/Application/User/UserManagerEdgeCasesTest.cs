@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using UnitTests.Helpers;
 using UserManager = Application.User.UserManager;
 using UserEntity = Domain.Users.Entities.User;
 using IPasswordManager = Domain.Users.Ports.In.IPasswordManager;
@@ -12,6 +13,7 @@ namespace UnitTests.Application.User;
 
 public class UserManagerEdgeCasesTest
 {
+    private readonly ILogger<UserManager> _logger;
     private readonly IPasswordManager _passwordManager;
     private readonly IUserRepository _userRepository;
     private readonly IUserPlanManager _userPlanManager;
@@ -21,12 +23,13 @@ public class UserManagerEdgeCasesTest
 
     public UserManagerEdgeCasesTest()
     {
+        _logger = Substitute.For<ILogger<UserManager>>();
         _passwordManager = Substitute.For<IPasswordManager>();
         _userRepository = Substitute.For<IUserRepository>();
         _userPlanManager = Substitute.For<IUserPlanManager>();
         _planManager = Substitute.For<IPlanManager>();
         _sut = new UserManager(
-            Substitute.For<ILogger<UserManager>>(),
+            _logger,
             _passwordManager,
             _userRepository,
             _userPlanManager,
@@ -140,5 +143,42 @@ public class UserManagerEdgeCasesTest
 
         // Assert
         await _userRepository.Received(1).UpdateAsync(Arg.Any<UserEntity>());
+    }
+
+    [Fact]
+    public async Task CreateUserAsync_WhenRepositoryThrows_ShouldLogErrorAndRethrow()
+    {
+        // Arrange
+        var request = new global::Domain.Users.Dto.UserCreateRequestDto
+        {
+            Name = "Test",
+            LastName = "User",
+            Email = "test@email.com",
+            BirthDate = DefaultBirthDate,
+            Password = "password"
+        };
+        _planManager.GetByNameAsync("Default").Returns(new PlanResponseDto { Id = 1, Name = "Default" });
+        var expectedException = new InvalidOperationException("Erro no banco de dados");
+        _userRepository
+            .When(r => r.CreateAsync(Arg.Any<UserEntity>()))
+            .Do(_ => throw expectedException);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.CreateUserAsync(request));
+        _logger.ShouldHaveLoggedError(expectedException);
+    }
+
+    [Fact]
+    public async Task GetAllUsersAsync_WhenRepositoryThrows_ShouldLogErrorAndRethrow()
+    {
+        // Arrange
+        var expectedException = new InvalidOperationException("Erro de conexão");
+        _userRepository
+            .When(r => r.GetAll())
+            .Do(_ => throw expectedException);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(_sut.GetAllUsersAsync);
+        _logger.ShouldHaveLoggedError(expectedException);
     }
 }

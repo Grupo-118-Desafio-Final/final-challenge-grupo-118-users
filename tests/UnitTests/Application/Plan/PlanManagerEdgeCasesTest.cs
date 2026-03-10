@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using UnitTests.Helpers;
 using PlanManager = Application.Plans.PlanManager;
 using PlanEntity = Domain.Plan.Entities.Plan;
 using PlanCreateRequestDto = Domain.Plan.Dto.PlanCreateRequestDto;
@@ -11,15 +12,17 @@ namespace UnitTests.Application.Plan;
 
 public class PlanManagerEdgeCasesTest
 {
+    private readonly ILogger<PlanManager> _logger;
     private readonly IPlanRepository _planRepository;
     private readonly IUserPlanManager _userPlanManager;
     private readonly PlanManager _sut;
 
     public PlanManagerEdgeCasesTest()
     {
+        _logger = Substitute.For<ILogger<PlanManager>>();
         _planRepository = Substitute.For<IPlanRepository>();
         _userPlanManager = Substitute.For<IUserPlanManager>();
-        _sut = new PlanManager(Substitute.For<ILogger<PlanManager>>(), _planRepository, _userPlanManager);
+        _sut = new PlanManager(_logger, _planRepository, _userPlanManager);
     }
 
     [Fact]
@@ -99,5 +102,34 @@ public class PlanManagerEdgeCasesTest
 
         // Assert
         await _planRepository.Received(1).CreateAsync(Arg.Any<PlanEntity>());
+    }
+
+    [Fact]
+    public async Task CreateAsync_WhenRepositoryThrows_ShouldLogErrorAndRethrow()
+    {
+        // Arrange
+        var dto = new PlanCreateRequestDto { Name = "Plano Erro", Price = 10m };
+        var expectedException = new InvalidOperationException("Erro no banco de dados");
+        _planRepository
+            .When(r => r.CreateAsync(Arg.Any<PlanEntity>()))
+            .Do(_ => throw expectedException);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _sut.CreateAsync(dto));
+        _logger.ShouldHaveLoggedError(expectedException);
+    }
+
+    [Fact]
+    public async Task GetAll_WhenRepositoryThrows_ShouldLogErrorAndRethrow()
+    {
+        // Arrange
+        var expectedException = new InvalidOperationException("Erro de conexão");
+        _planRepository
+            .When(r => r.GetAll())
+            .Do(_ => throw expectedException);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<InvalidOperationException>(_sut.GetAll);
+        _logger.ShouldHaveLoggedError(expectedException);
     }
 }

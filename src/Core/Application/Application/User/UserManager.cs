@@ -6,6 +6,7 @@ using Domain.Users.Ports.In;
 using Domain.Users.Ports.Out;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Application.User;
 
@@ -68,13 +69,7 @@ public class UserManager : IUserManager
         }
         catch (Exception ex)
         {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
-            {
-                { "exception.type", ex.GetType().FullName },
-                { "exception.message", ex.Message },
-                { "exception.stacktrace", ex.StackTrace }
-            }));
+            RecordExceptionSpan(activity, ex);
             _logger.LogError(ex, "Error creating user with email {Email}", request.Email);
             throw;
         }
@@ -104,13 +99,7 @@ public class UserManager : IUserManager
         }
         catch (Exception ex)
         {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
-            {
-                { "exception.type", ex.GetType().FullName },
-                { "exception.message", ex.Message },
-                { "exception.stacktrace", ex.StackTrace }
-            }));
+            RecordExceptionSpan(activity, ex);
             _logger.LogError(ex, "Error deleting user {UserId}", id);
             throw;
         }
@@ -132,13 +121,7 @@ public class UserManager : IUserManager
         }
         catch (Exception ex)
         {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
-            {
-                { "exception.type", ex.GetType().FullName },
-                { "exception.message", ex.Message },
-                { "exception.stacktrace", ex.StackTrace }
-            }));
+            RecordExceptionSpan(activity, ex);
             _logger.LogError(ex, "Error fetching all users");
             throw;
         }
@@ -158,13 +141,7 @@ public class UserManager : IUserManager
         }
         catch (Exception ex)
         {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
-            {
-                { "exception.type", ex.GetType().FullName },
-                { "exception.message", ex.Message },
-                { "exception.stacktrace", ex.StackTrace }
-            }));
+            RecordExceptionSpan(activity, ex);
             _logger.LogError(ex, "Error fetching user by email {Email}", email);
             throw;
         }
@@ -184,13 +161,7 @@ public class UserManager : IUserManager
         }
         catch (Exception ex)
         {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
-            {
-                { "exception.type", ex.GetType().FullName },
-                { "exception.message", ex.Message },
-                { "exception.stacktrace", ex.StackTrace }
-            }));
+            RecordExceptionSpan(activity, ex);
             _logger.LogError(ex, "Error fetching user {UserId}", id);
             throw;
         }
@@ -228,13 +199,7 @@ public class UserManager : IUserManager
         }
         catch (Exception ex)
         {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
-            {
-                { "exception.type", ex.GetType().FullName },
-                { "exception.message", ex.Message },
-                { "exception.stacktrace", ex.StackTrace }
-            }));
+            RecordExceptionSpan(activity, ex);
             _logger.LogError(ex, "Error during login for email {Email}", email);
             throw;
         }
@@ -265,15 +230,25 @@ public class UserManager : IUserManager
         }
         catch (Exception ex)
         {
-            activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-            activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
-            {
-                { "exception.type", ex.GetType().FullName },
-                { "exception.message", ex.Message },
-                { "exception.stacktrace", ex.StackTrace }
-            }));
+            RecordExceptionSpan(activity, ex);
             _logger.LogError(ex, "Error updating user {UserId}", request.Id);
             throw;
         }
+    }
+
+    /// <summary>
+    /// Registra a exceção no span do OpenTelemetry. Excluído da cobertura pois é
+    /// infraestrutura de observabilidade — coberto pelos testes de integração.
+    /// </summary>
+    [ExcludeFromCodeCoverage]
+    private static void RecordExceptionSpan(Activity? activity, Exception ex)
+    {
+        activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+        activity?.AddEvent(new ActivityEvent("exception", tags: new ActivityTagsCollection
+        {
+            { "exception.type", ex.GetType().FullName },
+            { "exception.message", ex.Message },
+            { "exception.stacktrace", ex.StackTrace }
+        }));
     }
 }
