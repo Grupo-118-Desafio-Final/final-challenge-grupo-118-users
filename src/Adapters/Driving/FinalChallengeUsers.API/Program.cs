@@ -9,6 +9,7 @@ using Domain.UserPlan.Ports.In;
 using Domain.UserPlan.Ports.Out;
 using Domain.Users.Ports.In;
 using Domain.Users.Ports.Out;
+using FinalChallengeUsers.API.Filter;
 using FinalChallengeUsers.API.Middlewares;
 using Infra.Database.SqlServer;
 using Infra.Database.SqlServer.ApiKey.Repositories;
@@ -17,6 +18,7 @@ using Infra.Database.SqlServer.UserPlan.Repositories;
 using Infra.Database.SqlServer.Users.Repositoires;
 using Infra.Password;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using StandardDependencies.Injection;
 using StandardDependencies.Models;
 
@@ -24,12 +26,6 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen(options =>
-//{
-//    // using System.Reflection;
-//    var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-//    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
-//});
 
 var swaggerOptions = builder
     .Configuration
@@ -44,10 +40,26 @@ var openTelemetryOptions = builder
 // Configura elementos comuns: Environment Variables, OpenTelemetry e Swagger
 builder.ConfigureCommonElements(openTelemetryOptions, swaggerOptions);
 
+builder.Services.AddSwaggerGen(s =>
+{
+    s.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. \r\n\r\n" +
+                      "Enter 'Bearer' [space] and then your token in the text input below.\r\n\r\n" +
+                      "Example: \"Bearer 12345abcdef\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    s.OperationFilter<OAuthOperationsFilter>();
+});
+
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.Configure<SecuritySettings>(
     builder.Configuration.GetSection("Security"));
@@ -77,6 +89,8 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.InstanceName = "FinalChallengeUsersAPI";
 });
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -85,23 +99,20 @@ using (var scope = app.Services.CreateScope())
     await db.Database.MigrateAsync();
 }
 
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
 app.Use(async (context, next) =>
 {
     var authMiddleware = context.RequestServices.GetRequiredService<AuthenticationMiddleware>();
     await authMiddleware.InvokeAsync(context, next);
 });
 
+app.UseStandarizedSwagger(swaggerOptions);
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHealthChecks("/health");
 
 app.Run();

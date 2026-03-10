@@ -14,7 +14,7 @@ public class AuthenticationMiddleware
     private readonly SecuritySettings _securitySettings;
     private readonly IConfiguration _configuration;
     private readonly ILogger<AuthenticationMiddleware> _logger;
-    private static readonly string[] AllowedPaths = new[] { "/users/login", "/users" };
+    private static readonly string[] AllowedPaths = new[] { "/users/login", "/users", "/health", "/swagger", "/" };
 
     public AuthenticationMiddleware(
         IApiKeyRepository apiKeyRepository,
@@ -30,7 +30,13 @@ public class AuthenticationMiddleware
 
     public async Task InvokeAsync(HttpContext context, RequestDelegate next)
     {
-        if(AllowedPaths.Any(p => context.Request.Path.StartsWithSegments(p, StringComparison.OrdinalIgnoreCase)))
+        if (context.Request.Path.ToString().Contains("swagger") || context.Request.Path.ToString().Contains("index"))
+        {
+            await next(context);
+            return;
+        }
+
+        if (AllowedPaths.Any(p => context.Request.Path.StartsWithSegments(p, StringComparison.OrdinalIgnoreCase)))
         {
             await next(context);
             return;
