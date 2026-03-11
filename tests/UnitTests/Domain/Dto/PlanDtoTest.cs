@@ -22,7 +22,7 @@ public class PlanDtoTest
             ImageQuality = ImageQualityEnum.FullHd,
             MaxSizeInMegaBytes = "500",
             MaxDurationInSeconds = "60",
-            Threads = "4"
+            DesiredFrames = "4"
         };
 
         var dto = PlanCreateRequestDto.ToDto(plan);
@@ -32,7 +32,7 @@ public class PlanDtoTest
         Assert.Equal(ImageQualityEnum.FullHd, dto.ImageQuality);
         Assert.Equal("500", dto.MaxSizeInMegaBytes);
         Assert.Equal("60", dto.MaxDurationInSeconds);
-        Assert.Equal("4", dto.Threads);
+        Assert.Equal("4", dto.DesiredFrames);
     }
 
     [Fact]
@@ -45,7 +45,7 @@ public class PlanDtoTest
             ImageQuality = ImageQualityEnum.UltraHd,
             MaxSizeInMegaBytes = "300",
             MaxDurationInSeconds = "30",
-            Threads = "2"
+            DesiredFrames = "2"
         };
 
         var plan = PlanCreateRequestDto.ToEntity(dto);
@@ -55,7 +55,7 @@ public class PlanDtoTest
         Assert.Equal(ImageQualityEnum.UltraHd, plan.ImageQuality);
         Assert.Equal("300", plan.MaxSizeInMegaBytes);
         Assert.Equal("30", plan.MaxDurationInSeconds);
-        Assert.Equal("2", plan.Threads);
+        Assert.Equal("2", plan.DesiredFrames);
     }
 
     [Fact]
@@ -66,7 +66,7 @@ public class PlanDtoTest
         Assert.Equal(ImageQualityEnum.Hd, dto.ImageQuality);
         Assert.Equal("200", dto.MaxSizeInMegaBytes);
         Assert.Equal("20", dto.MaxDurationInSeconds);
-        Assert.Equal("1", dto.Threads);
+        Assert.Equal("1", dto.DesiredFrames);
     }
 
     // --- PlanResponseDto ---
@@ -82,7 +82,7 @@ public class PlanDtoTest
             ImageQuality = ImageQualityEnum.FourK,
             MaxSizeInMegaBytes = "1000",
             MaxDurationInSeconds = "120",
-            Threads = "8"
+            DesiredFrames = "8"
         };
 
         var dto = PlanResponseDto.ToDto(plan);
@@ -93,7 +93,7 @@ public class PlanDtoTest
         Assert.Equal(ImageQualityEnum.FourK, dto.ImageQuality);
         Assert.Equal("1000", dto.MaxSizeInMegaBytes);
         Assert.Equal("120", dto.MaxDurationInSeconds);
-        Assert.Equal("8", dto.Threads);
+        Assert.Equal("8", dto.DesiredFrames);
     }
 
     [Fact]
@@ -107,7 +107,7 @@ public class PlanDtoTest
         Assert.Equal(ImageQualityEnum.Hd, dto.ImageQuality);
         Assert.Equal("200", dto.MaxSizeInMegaBytes);
         Assert.Equal("20", dto.MaxDurationInSeconds);
-        Assert.Equal("1", dto.Threads);
+        Assert.Equal("1", dto.DesiredFrames);
     }
 
     [Fact]
@@ -131,7 +131,7 @@ public class PlanDtoTest
         Assert.Equal(ImageQualityEnum.Hd, dto.ImageQuality);
         Assert.Equal("200", dto.MaxSizeInMegaBytes);
         Assert.Equal("20", dto.MaxDurationInSeconds);
-        Assert.Equal("1", dto.Threads);
+        Assert.Equal("1", dto.DesiredFrames);
     }
 
     [Fact]
@@ -155,7 +155,7 @@ public class PlanDtoTest
             ImageQuality = ImageQualityEnum.EightK,
             MaxSizeInMegaBytes = "5000",
             MaxDurationInSeconds = "3600",
-            Threads = "16"
+            DesiredFrames = "16"
         };
 
         Assert.Equal(7, dto.Id);
@@ -164,7 +164,7 @@ public class PlanDtoTest
         Assert.Equal(ImageQualityEnum.EightK, dto.ImageQuality);
         Assert.Equal("5000", dto.MaxSizeInMegaBytes);
         Assert.Equal("3600", dto.MaxDurationInSeconds);
-        Assert.Equal("16", dto.Threads);
+        Assert.Equal("16", dto.DesiredFrames);
     }
 
     // --- PlanUpdateRequestDto private methods (via reflection) ---
@@ -180,7 +180,7 @@ public class PlanDtoTest
             ImageQuality = ImageQualityEnum.FullHd,
             MaxSizeInMegaBytes = "500",
             MaxDurationInSeconds = "60",
-            Threads = "4"
+            DesiredFrames = "4"
         };
 
         var toDtoMethod = typeof(PlanUpdateRequestDto)
@@ -196,7 +196,7 @@ public class PlanDtoTest
         Assert.Equal(ImageQualityEnum.FullHd, result.ImageQuality);
         Assert.Equal("500", result.MaxSizeInMegaBytes);
         Assert.Equal("60", result.MaxDurationInSeconds);
-        Assert.Equal("4", result.Threads);
+        Assert.Equal("4", result.DesiredFrames);
     }
 
     [Fact]
@@ -210,7 +210,7 @@ public class PlanDtoTest
             ImageQuality = ImageQualityEnum.UltraHd,
             MaxSizeInMegaBytes = "800",
             MaxDurationInSeconds = "80",
-            Threads = "8"
+            DesiredFrames = "8"
         };
 
         var toEntityMethod = typeof(PlanUpdateRequestDto)
@@ -226,6 +226,6 @@ public class PlanDtoTest
         Assert.Equal(ImageQualityEnum.UltraHd, result.ImageQuality);
         Assert.Equal("800", result.MaxSizeInMegaBytes);
         Assert.Equal("80", result.MaxDurationInSeconds);
-        Assert.Equal("8", result.Threads);
+        Assert.Equal("8", result.DesiredFrames);
     }
 }

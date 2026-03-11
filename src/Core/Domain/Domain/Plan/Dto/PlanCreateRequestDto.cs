@@ -9,7 +9,7 @@ public class PlanCreateRequestDto
     public ImageQualityEnum ImageQuality { get; set; } = ImageQualityEnum.Hd;
     public string MaxSizeInMegaBytes { get; set; } = "200";
     public string MaxDurationInSeconds { get; set; } = "20";
-    public string Threads { get; set; } = "1";
+    public int DesiredFrames { get; set; } = 1;
     public static PlanCreateRequestDto ToDto(Entities.Plan plan)
     {
         return new PlanCreateRequestDto
@@ -19,7 +19,7 @@ public class PlanCreateRequestDto
             ImageQuality = plan.ImageQuality,
             MaxSizeInMegaBytes = plan.MaxSizeInMegaBytes,
             MaxDurationInSeconds = plan.MaxDurationInSeconds,
-            Threads = plan.Threads
+            DesiredFrames = plan.DesiredFrames
         };
     }
 
@@ -32,7 +32,7 @@ public class PlanCreateRequestDto
             ImageQuality = request.ImageQuality,
             MaxSizeInMegaBytes = request.MaxSizeInMegaBytes,
             MaxDurationInSeconds = request.MaxDurationInSeconds,
-            Threads = request.Threads
+            DesiredFrames = request.DesiredFrames
         };
     }
 }

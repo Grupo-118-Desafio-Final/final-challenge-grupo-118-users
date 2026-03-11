@@ -35,7 +35,7 @@ public class PlanManagerTest
             ImageQuality = ImageQualityEnum.FullHd,
             MaxSizeInMegaBytes = "300",
             MaxDurationInSeconds = "30",
-            Threads = "2"
+            DesiredFrames = "2"
         };
 
         // Act
@@ -48,7 +48,7 @@ public class PlanManagerTest
             p.ImageQuality == dto.ImageQuality &&
             p.MaxSizeInMegaBytes == dto.MaxSizeInMegaBytes &&
             p.MaxDurationInSeconds == dto.MaxDurationInSeconds &&
-            p.Threads == dto.Threads
+            p.DesiredFrames == dto.DesiredFrames
         ));
     }
 
