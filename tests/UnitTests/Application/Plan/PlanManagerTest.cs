@@ -35,7 +35,7 @@ public class PlanManagerTest
             ImageQuality = ImageQualityEnum.FullHd,
             MaxSizeInMegaBytes = "300",
             MaxDurationInSeconds = "30",
-            DesiredFrames = "2"
+            DesiredFrames = 2
         };
 
         // Act

@@ -21,7 +21,7 @@ public class PlanRepositoryTest : InfraTestBase
             ImageQuality = ImageQualityEnum.Hd,
             MaxSizeInMegaBytes = "200",
             MaxDurationInSeconds = "20",
-            DesiredFrames = "1"
+            DesiredFrames = 1
         };
 
     [Fact]
