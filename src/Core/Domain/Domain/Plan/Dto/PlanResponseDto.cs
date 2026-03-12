@@ -1,4 +1,5 @@
 ﻿using Domain.Plan.ValueObjects;
+using PlanEntity = Domain.Plan.Entities.Plan;
 
 namespace Domain.Plan.Dto;
 
@@ -39,6 +40,20 @@ public class PlanResponseDto
             MaxSizeInMegaBytes = plan.MaxSizeInMegaBytes,
             MaxDurationInSeconds = plan.MaxDurationInSeconds,
             DesiredFrames = plan.DesiredFrames
+        };
+    }
+
+    public static PlanEntity ToEntity(PlanResponseDto planResponseDto)
+    {
+        return new PlanEntity
+        {
+            Id = planResponseDto.Id,
+            Name = planResponseDto.Name,
+            Price = planResponseDto.Price,
+            ImageQuality = planResponseDto.ImageQuality,
+            MaxSizeInMegaBytes = planResponseDto.MaxSizeInMegaBytes,
+            MaxDurationInSeconds = planResponseDto.MaxDurationInSeconds,
+            DesiredFrames = planResponseDto.DesiredFrames
         };
     }
 }

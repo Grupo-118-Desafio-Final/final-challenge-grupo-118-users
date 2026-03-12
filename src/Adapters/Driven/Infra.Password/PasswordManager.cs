@@ -6,6 +6,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using UserEntity = Domain.Users.Entities.User;
+using PlanEntity = Domain.Plan.Entities.Plan;
 
 namespace Infra.Password;
 
@@ -44,7 +45,7 @@ public class PasswordManager : IPasswordManager
         return computedHash == storedHash;
     }
 
-    public string GenerateJwtToken(UserEntity user)
+    public string GenerateJwtToken(UserEntity user, PlanEntity plan)
     {
         if (string.IsNullOrWhiteSpace(_settings.JwtKey) || _settings.JwtKey.Length < 32)
             throw new InvalidOperationException("JwtKey não está configurado ou é muito curto (mínimo 32 caracteres).");
@@ -53,6 +54,7 @@ public class PasswordManager : IPasswordManager
         {
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new(ClaimTypes.Name, user.Name),
+            new("X-Plan-id", plan.Id.ToString()),
         };
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_settings.JwtKey));

@@ -3,6 +3,8 @@ using Microsoft.Extensions.Options;
 using Infra.Password;
 using Domain.Users.Entities;
 using System.IdentityModel.Tokens.Jwt;
+using Domain.Plan.Entities;
+using Domain.Plan.ValueObjects;
 
 namespace UnitTests.Infra;
 
@@ -116,7 +118,9 @@ public class PasswordManagerTest
     {
         var user = new User("João", "Silva", "joao@email.com", new DateTime(1990, 1, 1));
 
-        var token = _sut.GenerateJwtToken(user);
+        var plan = new Plan { Name = "Basic", Price = 9.99m, ImageQuality = ImageQualityEnum.Hd, MaxSizeInMegaBytes = "500", MaxDurationInSeconds = "3600", DesiredFrames = 30 };
+
+        var token = _sut.GenerateJwtToken(user, plan);
 
         Assert.NotNull(token);
         Assert.NotEmpty(token);
@@ -127,7 +131,9 @@ public class PasswordManagerTest
     {
         var user = new User("Maria", "Costa", "maria@email.com", new DateTime(1985, 6, 15));
 
-        var token = _sut.GenerateJwtToken(user);
+        var plan = new Plan { Name = "Basic", Price = 9.99m, ImageQuality = ImageQualityEnum.Hd, MaxSizeInMegaBytes = "500", MaxDurationInSeconds = "3600", DesiredFrames = 30 };
+
+        var token = _sut.GenerateJwtToken(user, plan);
 
         var parts = token.Split('.');
         Assert.Equal(3, parts.Length);
@@ -138,7 +144,9 @@ public class PasswordManagerTest
     {
         var user = new User("Carlos", "Lima", "carlos@email.com", new DateTime(1995, 3, 20));
 
-        var token = _sut.GenerateJwtToken(user);
+        var plan = new Plan { Name = "Basic", Price = 9.99m, ImageQuality = ImageQualityEnum.Hd, MaxSizeInMegaBytes = "500", MaxDurationInSeconds = "3600", DesiredFrames = 30 };
+
+        var token = _sut.GenerateJwtToken(user, plan);
 
         var handler = new JwtSecurityTokenHandler();
         var jwtToken = handler.ReadJwtToken(token);
@@ -154,7 +162,9 @@ public class PasswordManagerTest
     {
         var user = new User("Ana", "Pereira", "ana@email.com", new DateTime(2000, 12, 31));
 
-        var token = _sut.GenerateJwtToken(user);
+        var plan = new Plan { Name = "Basic", Price = 9.99m, ImageQuality = ImageQualityEnum.Hd, MaxSizeInMegaBytes = "500", MaxDurationInSeconds = "3600", DesiredFrames = 30 };
+
+        var token = _sut.GenerateJwtToken(user, plan);
 
         var handler = new JwtSecurityTokenHandler();
         var jwtToken = handler.ReadJwtToken(token);
@@ -170,7 +180,9 @@ public class PasswordManagerTest
     {
         var user = new User("Pedro", "Alves", "pedro@email.com", new DateTime(1988, 7, 4));
 
-        var token = _sut.GenerateJwtToken(user);
+        var plan = new Plan { Name = "Basic", Price = 9.99m, ImageQuality = ImageQualityEnum.Hd, MaxSizeInMegaBytes = "500", MaxDurationInSeconds = "3600", DesiredFrames = 30 };
+
+        var token = _sut.GenerateJwtToken(user, plan);
 
         var handler = new JwtSecurityTokenHandler();
         var jwtToken = handler.ReadJwtToken(token);
@@ -184,8 +196,11 @@ public class PasswordManagerTest
         var user1 = new User("User1", "Last1", "user1@email.com", new DateTime(1990, 1, 1));
         var user2 = new User("User2", "Last2", "user2@email.com", new DateTime(1990, 1, 1));
 
-        var token1 = _sut.GenerateJwtToken(user1);
-        var token2 = _sut.GenerateJwtToken(user2);
+        var plan1 = new Plan { Name = "Basic", Price = 9.99m, ImageQuality = ImageQualityEnum.Hd, MaxSizeInMegaBytes = "500", MaxDurationInSeconds = "3600", DesiredFrames = 30 };
+        var plan2 = new Plan { Name = "Fremmiun", Price = 9.99m, ImageQuality = ImageQualityEnum.Hd, MaxSizeInMegaBytes = "500", MaxDurationInSeconds = "3600", DesiredFrames = 30 };
+
+        var token1 = _sut.GenerateJwtToken(user1, plan1);
+        var token2 = _sut.GenerateJwtToken(user2, plan2);
 
         Assert.NotEqual(token1, token2);
     }
@@ -198,7 +213,9 @@ public class PasswordManagerTest
         var sut = CreateSut(jwtKey: string.Empty);
         var user = new User("Test", "User", "test@email.com", new DateTime(1990, 1, 1));
 
-        Assert.Throws<InvalidOperationException>(() => sut.GenerateJwtToken(user));
+        var plan = new Plan { Name = "Basic", Price = 9.99m, ImageQuality = ImageQualityEnum.Hd, MaxSizeInMegaBytes = "500", MaxDurationInSeconds = "3600", DesiredFrames = 30 };
+
+        Assert.Throws<InvalidOperationException>(() => sut.GenerateJwtToken(user, plan));
     }
 
     [Fact]
@@ -206,8 +223,9 @@ public class PasswordManagerTest
     {
         var sut = CreateSut(jwtKey: "short-key");
         var user = new User("Test", "User", "test@email.com", new DateTime(1990, 1, 1));
+        var plan = new Plan { Name = "Basic", Price = 9.99m, ImageQuality = ImageQualityEnum.Hd, MaxSizeInMegaBytes = "500", MaxDurationInSeconds = "3600", DesiredFrames = 30 };
 
-        Assert.Throws<InvalidOperationException>(() => sut.GenerateJwtToken(user));
+        Assert.Throws<InvalidOperationException>(() => sut.GenerateJwtToken(user, plan));
     }
 
     [Fact]
