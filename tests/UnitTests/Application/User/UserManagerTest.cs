@@ -1,14 +1,16 @@
+using Domain.Plan.ValueObjects;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using UserManager = Application.User.UserManager;
-using UserEntity = Domain.Users.Entities.User;
-using UserCreateRequestDto = Domain.Users.Dto.UserCreateRequestDto;
-using UserUpdateRequestDto = Domain.Users.Dto.UserUpdateRequestDto;
 using IPasswordManager = Domain.Users.Ports.In.IPasswordManager;
-using IUserRepository = Domain.Users.Ports.Out.IUserRepository;
-using IUserPlanManager = Domain.UserPlan.Ports.In.IUserPlanManager;
 using IPlanManager = Domain.Plan.Ports.In.IPlanManager;
+using IUserPlanManager = Domain.UserPlan.Ports.In.IUserPlanManager;
+using IUserRepository = Domain.Users.Ports.Out.IUserRepository;
 using PlanResponseDto = Domain.Plan.Dto.PlanResponseDto;
+using UserCreateRequestDto = Domain.Users.Dto.UserCreateRequestDto;
+using UserEntity = Domain.Users.Entities.User;
+using UserManager = Application.User.UserManager;
+using PlanEntity = Domain.Plan.Entities.Plan;
+using UserUpdateRequestDto = Domain.Users.Dto.UserUpdateRequestDto;
 
 namespace UnitTests.Application.User;
 
@@ -165,10 +167,12 @@ public class UserManagerTest
     {
         // Arrange
         var user = new UserEntity("João", "Silva", "joao@email.com", DefaultBirthDate);
+        var planDto = new PlanResponseDto { Id = 1, Name = "Basic", Price = 9.99m, ImageQuality = ImageQualityEnum.Hd, MaxSizeInMegaBytes = "500", MaxDurationInSeconds = "3600", DesiredFrames = 30 };
         user.SetPassword("hashed");
         _userRepository.GetByEmailAsync("joao@email.com").Returns(user);
         _passwordManager.VerifyPassword("senha123", "hashed").Returns(true);
-        _passwordManager.GenerateJwtToken(user).Returns("jwt_token_abc");
+        _planManager.GetPlanByUserId(user.Id.ToString()).Returns(planDto);
+        _passwordManager.GenerateJwtToken(user, Arg.Any<PlanEntity>()).Returns("jwt_token_abc");
 
         // Act
         var result = await _sut.LoginAsync("joao@email.com", "senha123");

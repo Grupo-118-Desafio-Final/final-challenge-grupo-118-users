@@ -69,7 +69,7 @@ public class PlanController : ControllerBase
     /// <returns>
     /// HTTP 200 com os dados do plano, ou HTTP 404 caso não seja encontrado.
     /// </returns>
-    [HttpGet("user/{userId}")]
+    [HttpGet("{userId:guid}")]
     [ProducesResponseType(200)]
     [ProducesResponseType(404)]
     public async Task<IActionResult> GetPlanByUserId(string userId)

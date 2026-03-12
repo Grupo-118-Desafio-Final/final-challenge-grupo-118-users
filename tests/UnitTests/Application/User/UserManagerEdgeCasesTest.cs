@@ -3,6 +3,7 @@ using NSubstitute;
 using UnitTests.Helpers;
 using UserManager = Application.User.UserManager;
 using UserEntity = Domain.Users.Entities.User;
+using PlanEntity = Domain.Plan.Entities.Plan;
 using IPasswordManager = Domain.Users.Ports.In.IPasswordManager;
 using IUserRepository = Domain.Users.Ports.Out.IUserRepository;
 using IUserPlanManager = Domain.UserPlan.Ports.In.IUserPlanManager;
@@ -51,7 +52,7 @@ public class UserManagerEdgeCasesTest
         // Assert
         _passwordManager.Received(1).VerifyPassword("wrong_password", "hashed_password");
         Assert.Equal("Invalid password.", result);
-        _passwordManager.DidNotReceive().GenerateJwtToken(Arg.Any<UserEntity>());
+        _passwordManager.DidNotReceive().GenerateJwtToken(Arg.Any<UserEntity>(), Arg.Any<PlanEntity>());
     }
 
     [Fact]

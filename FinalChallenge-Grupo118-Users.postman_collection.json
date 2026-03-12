@@ -158,7 +158,7 @@
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Premium\",\n  \"price\": 49.90,\n  \"imageQuality\": 2,\n  \"maxSizeInMegaBytes\": \"500\",\n  \"maxDurationInSeconds\": \"60\",\n  \"threads\": \"4\"\n}"
+              "raw": "{\n  \"name\": \"Premium\",\n  \"price\": 49.90,\n  \"imageQuality\": 2,\n  \"maxSizeInMegaBytes\": \"500\",\n  \"maxDurationInSeconds\": \"60\",\n  \"desiredFrames\": 30\n}"
             },
             "url": {
               "raw": "{{baseUrl}}/plan",
@@ -185,9 +185,9 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/plan/user/00000000-0000-0000-0000-000000000000",
+              "raw": "{{baseUrl}}/plan/00000000-0000-0000-0000-000000000000",
               "host": ["{{baseUrl}}"],
-              "path": ["plan", "user", "00000000-0000-0000-0000-000000000000"]
+              "path": ["plan", "00000000-0000-0000-0000-000000000000"]
             },
             "description": "Retorna o plano associado a um usuário. Substitua o UUID pelo ID real do usuário."
           }
@@ -260,9 +260,9 @@
           "request": {
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/userplan/user/00000000-0000-0000-0000-000000000000",
+              "raw": "{{baseUrl}}/userplan/00000000-0000-0000-0000-000000000000",
               "host": ["{{baseUrl}}"],
-              "path": ["userplan", "user", "00000000-0000-0000-0000-000000000000"]
+              "path": ["userplan", "00000000-0000-0000-0000-000000000000"]
             },
             "description": "Retorna o vínculo de um usuário com seu plano. Substitua o UUID pelo ID real do usuário."
           }
