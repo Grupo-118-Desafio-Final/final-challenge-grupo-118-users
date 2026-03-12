@@ -17,7 +17,7 @@ public class PlanTest
         Assert.Equal(ImageQuality.Hd, plan.ImageQuality);
         Assert.Equal("200", plan.MaxSizeInMegaBytes);
         Assert.Equal("20", plan.MaxDurationInSeconds);
-        Assert.Equal("1", plan.Threads);
+        Assert.Equal(1, plan.DesiredFrames);
         Assert.NotNull(plan.UsersPlans);
         Assert.Empty(plan.UsersPlans);
     }
@@ -99,10 +99,10 @@ public class PlanTest
         var plan = new PlanEntity();
 
         // Act
-        plan.Threads = "4";
+        plan.DesiredFrames = 4;
 
         // Assert
-        Assert.Equal("4", plan.Threads);
+        Assert.Equal(4, plan.DesiredFrames);
     }
 
     [Fact]

@@ -29,7 +29,7 @@ public class PlanConfiguration : IEntityTypeConfiguration<PlanEntity>
         builder.Property(t => t.MaxDurationInSeconds)
             .IsRequired();
 
-        builder.Property(t => t.Threads)
+        builder.Property(t => t.DesiredFrames)
             .IsRequired();
 
         builder.Property(t => t.CreatedAt)
@@ -61,7 +61,7 @@ public class PlanConfiguration : IEntityTypeConfiguration<PlanEntity>
                 ImageQuality = Domain.Plan.ValueObjects.ImageQualityEnum.Hd,
                 MaxSizeInMegaBytes = "200",
                 MaxDurationInSeconds = "20",
-                Threads = "2"
+                DesiredFrames = 2
             },
             new PlanEntity
             {
@@ -71,7 +71,7 @@ public class PlanConfiguration : IEntityTypeConfiguration<PlanEntity>
                 ImageQuality = Domain.Plan.ValueObjects.ImageQualityEnum.FullHd,
                 MaxSizeInMegaBytes = "2000",
                 MaxDurationInSeconds = "1200",
-                Threads = "4"
+                DesiredFrames = 4
             },
             new PlanEntity
             {
@@ -81,7 +81,7 @@ public class PlanConfiguration : IEntityTypeConfiguration<PlanEntity>
                 ImageQuality = Domain.Plan.ValueObjects.ImageQualityEnum.FourK,
                 MaxSizeInMegaBytes = "10000",
                 MaxDurationInSeconds = "3600",
-                Threads = "8"
+                DesiredFrames = 8
             }
         };
     }

@@ -7,6 +7,7 @@ using Domain.Users.Ports.In;
 using Domain.Users.Ports.Out;
 using Microsoft.Extensions.Logging;
 using System.Diagnostics;
+using Domain.Plan.Dto;
 
 namespace Application.User;
 
@@ -191,7 +192,11 @@ public class UserManager : IUserManager
                 return "Invalid password.";
             }
 
-            var token = _passwordManager.GenerateJwtToken(user);
+            var planDto = await _planManager.GetPlanByUserId(user.Id.ToString());
+
+            var plan  = PlanResponseDto.ToEntity(planDto);
+
+            var token = _passwordManager.GenerateJwtToken(user, plan);
             _logger.LogInformation("Login successful for user {UserId}", user.Id);
             activity?.SetTag("user.id", user.Id.ToString());
             activity?.SetStatus(ActivityStatusCode.Ok);
