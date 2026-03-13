@@ -53,7 +53,7 @@ public class UserManager : IUserManager
             _logger.LogInformation("User {UserId} persisted", user.Id);
 
             activity?.AddEvent(new ActivityEvent("fetching default plan"));
-            var planDto = await _planManager.GetByNameAsync("Default");
+            var planDto = await _planManager.GetById(request.PlanId);
 
             var userPlanRequest = new UserPlanCreateRequest
             {
