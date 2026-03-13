@@ -40,7 +40,7 @@ public class PlanController : ControllerBase
     {
         var cacheKey = $"plan:{id}";
 
-        var result = await _cache.GetOrCreateAsync(cacheKey, () => _planManager.GetById(id), TimeSpan.FromMinutes(10));
+        var result = await _cache.GetOrCreateAsync(cacheKey, () => _planManager.GetById(id), TimeSpan.FromMinutes(2));
 
         if (result is null)
             return NotFound();
@@ -76,7 +76,7 @@ public class PlanController : ControllerBase
     {
         var cacheKey = $"user_plan:{userId}";
 
-        var plan = await _cache.GetOrCreateAsync(cacheKey, () => _planManager.GetPlanByUserId(userId), TimeSpan.FromMinutes(10));
+        var plan = await _cache.GetOrCreateAsync(cacheKey, () => _planManager.GetPlanByUserId(userId), TimeSpan.FromMinutes(2));
 
         if (plan is null)
             return NotFound();
@@ -94,7 +94,7 @@ public class PlanController : ControllerBase
     {
         var cacheKey = "plans:all";
 
-        var result = await _cache.GetOrCreateAsync(cacheKey, () => _planManager.GetAll(), TimeSpan.FromMinutes(10));
+        var result = await _cache.GetOrCreateAsync(cacheKey, () => _planManager.GetAll(), TimeSpan.FromMinutes(2));
 
         return Ok(result);
     }
