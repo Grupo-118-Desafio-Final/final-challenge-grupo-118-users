@@ -106,7 +106,7 @@ public class UserManagerEdgeCasesTest
         _userRepository
             .When(r => r.CreateAsync(Arg.Any<UserEntity>()))
             .Do(_ => callOrder.Add("create"));
-        _planManager.GetByNameAsync("Default").Returns(new PlanResponseDto { Id = 1, Name = "Default" });
+        _planManager.GetById(1).Returns(new PlanResponseDto { Id = 1, Name = "Default" });
 
         var request = new global::Domain.Users.Dto.UserCreateRequestDto
         {
@@ -114,7 +114,8 @@ public class UserManagerEdgeCasesTest
             LastName = "User",
             Email = "test@email.com",
             BirthDate = DefaultBirthDate,
-            Password = "password"
+            Password = "password",
+            PlanId = 1
         };
 
         // Act

@@ -47,12 +47,13 @@ public class UserManagerTest
             LastName = "Silva",
             Email = "joao@email.com",
             BirthDate = DefaultBirthDate,
-            Password = "senha123"
+            Password = "senha123",
+            PlanId = 1
         };
         _passwordManager
             .When(p => p.CreatePasswordHash(Arg.Any<string>(), out Arg.Any<string>()))
             .Do(call => call[1] = "hashed_senha123");
-        _planManager.GetByNameAsync("Default").Returns(new PlanResponseDto { Id = 1, Name = "Default" });
+        _planManager.GetById(1).Returns(new PlanResponseDto { Id = 1, Name = "Default" });
 
         // Act
         var result = await _sut.CreateUserAsync(request);
