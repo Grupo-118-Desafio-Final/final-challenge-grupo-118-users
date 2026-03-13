@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UserEntity = Domain.Users.Entities.User;
+using PlanEntity = Domain.Plan.Entities.Plan;
 namespace Domain.Users.Ports.In;
 
 public interface IPasswordManager
@@ -13,5 +14,5 @@ public interface IPasswordManager
 
     bool VerifyPassword(string password, string storedHash);
 
-    string GenerateJwtToken(UserEntity user);
+    string GenerateJwtToken(UserEntity user, PlanEntity plan);
 }

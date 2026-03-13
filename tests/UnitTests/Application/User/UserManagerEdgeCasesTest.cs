@@ -3,6 +3,7 @@ using NSubstitute;
 using UnitTests.Helpers;
 using UserManager = Application.User.UserManager;
 using UserEntity = Domain.Users.Entities.User;
+using PlanEntity = Domain.Plan.Entities.Plan;
 using IPasswordManager = Domain.Users.Ports.In.IPasswordManager;
 using IUserRepository = Domain.Users.Ports.Out.IUserRepository;
 using IUserPlanManager = Domain.UserPlan.Ports.In.IUserPlanManager;
@@ -51,7 +52,7 @@ public class UserManagerEdgeCasesTest
         // Assert
         _passwordManager.Received(1).VerifyPassword("wrong_password", "hashed_password");
         Assert.Equal("Invalid password.", result);
-        _passwordManager.DidNotReceive().GenerateJwtToken(Arg.Any<UserEntity>());
+        _passwordManager.DidNotReceive().GenerateJwtToken(Arg.Any<UserEntity>(), Arg.Any<PlanEntity>());
     }
 
     [Fact]
@@ -105,7 +106,7 @@ public class UserManagerEdgeCasesTest
         _userRepository
             .When(r => r.CreateAsync(Arg.Any<UserEntity>()))
             .Do(_ => callOrder.Add("create"));
-        _planManager.GetByNameAsync("Default").Returns(new PlanResponseDto { Id = 1, Name = "Default" });
+        _planManager.GetById(1).Returns(new PlanResponseDto { Id = 1, Name = "Default" });
 
         var request = new global::Domain.Users.Dto.UserCreateRequestDto
         {
@@ -113,7 +114,8 @@ public class UserManagerEdgeCasesTest
             LastName = "User",
             Email = "test@email.com",
             BirthDate = DefaultBirthDate,
-            Password = "password"
+            Password = "password",
+            PlanId = 1
         };
 
         // Act
